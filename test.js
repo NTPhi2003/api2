@@ -4,10 +4,11 @@ var coursesApi = 'http://localhost:3000/course'
 
 
 function start() {
-    getCourses(function(courses) {
-        renderCourses(courses)
-    })
-
+    // getCourses(function(courses) {
+    //     renderCourses(courses)
+    // })
+    getCourses(renderCourses)
+    
     handleCreateForm()
 }
 
@@ -39,13 +40,33 @@ function createCourse(data, callback) {
         .then(callback)
 }
 
+function deleteCourse(id) {
+    var options = {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    }
+    fetch(coursesApi +  '/' + id, options)
+        .then(function(response) {
+            response.json();
+        })
+        .then(function() {
+            var courseItem = document.querySelector('.course-item-'+id);
+            if(courseItem) {
+                courseItem.remove();
+            }
+        }) 
+}
+
 function renderCourses(courses) {
     var listCoursesBlock = document.querySelector('#list-courses')
     var htmls = courses.map(function(course) {
         return `
-            <li>
+            <li class="course-item-${course.id}">
                 <h4>${course.name}</h4>
                 <p>${course.description}</p>
+                <button onclick="deleteCourse(${course.id})">Xoá</button>
             </li>
         `
     })
@@ -64,11 +85,9 @@ function handleCreateForm() {
             description: description
         }
         createCourse(formData, function() {
-            getCourses(function(courses) {
-                renderCourses(courses)
-            })
+            getCourses(renderCourses)
         })
-
+        
     }
     
 }
